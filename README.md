@@ -50,7 +50,7 @@ Patterns propagate across enclaves. Content stays put.
 
 ## Documentation
 
-📄 **[Whitepaper: Intelligent Orchestration for the Multi-Model Era](docs/whitepaper.md)** ([PDF](docs/whitepaper.pdf))
+📄 **[Whitepaper: Intelligent Orchestration for the Multi-Model Era](docs/whitepaper.md)** ([PDF](docs/MCI_Whitepaper_Puckett.pdf))
 
 Covers the full architectural pattern: eight components, five layers, implementation guidance, and domain vignettes.
 
