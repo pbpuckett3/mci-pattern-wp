@@ -184,6 +184,10 @@ This multi-layer presence means MCP is the connective tissue of the architecture
 
 MCI provides the decision intelligence. MCP provides the protocol. Together they form a complete orchestration architecture where routing decisions are informed by real-time context from across the system.
 
+![MCI Architecture: MCP as Multi-Layer Protocol](./images/mci_architecture_diagram.png)
+
+*Figure 1: MCI architecture showing MCP as the universal connective tissue across all layers. The control plane (top) handles centralized policy and routing decisions. Sub-agents (middle) execute tasks and can collaborate peer-to-peer within authorized workflows. MCP connects everything — from orchestration context at Layer 4 to tool access at Layer 1.*
+
 ---
 
 ## 4. Five-Layer Architecture
