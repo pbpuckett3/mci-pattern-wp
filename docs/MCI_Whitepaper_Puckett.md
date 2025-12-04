@@ -7,57 +7,61 @@
 
 ## Executive Summary
 
-The AI industry has built itself on a concentrated foundation. Frontier model inference depends on high-end GPUs manufactured by a single company, fabricated by a single foundry, packaged with capacity already sold out through 2026. The April 2024 Taiwan earthquake caused only brief production pauses (TSMC's engineering held), but the deeper vulnerability is geopolitical: Taiwan Strait tensions threaten access to infrastructure that cannot be quickly replicated elsewhere.
+Four independent forcing functions are converging on the same conclusion: organizations will operate across heterogeneous model tiers — from micro language models at the edge to frontier models in secure clouds — whether they plan for it or not.
 
-Meanwhile, organizations are routing every task, from calendar lookups to code generation to threat detection, through these same constrained frontier models. Stanford's 2025 AI Index reports that inference costs for GPT-3.5-equivalent performance dropped 280-fold between 2022 and 2024. Yet enterprise AI budgets continue rising as usage growth outpaces efficiency gains. The paradox: per-token costs are falling while total spend accelerates. Cheaper models, used for everything, cost more than right-sized models used appropriately.
+**Infrastructure risk.** Frontier model inference depends on concentrated GPU supply chains: a single manufacturer, a single foundry, packaging capacity sold out through 2026. Taiwan Strait tensions threaten access to infrastructure that cannot be quickly replicated. Betting everything on frontier availability is a strategic vulnerability.
 
-This is not sustainable. And it is not necessary.
+**Economic crossover.** Fine-tuning specialized models used to be prohibitively expensive. That has changed. The cost of training a domain-specific 3B-7B parameter model has dropped by orders of magnitude. For high-volume tasks, building a specialized model is now cheaper than renting frontier inference at scale — and unlike API spend, the model becomes an asset you own.
 
-Specialized models under 3 billion parameters now match frontier performance on bounded tasks, at a fraction of the cost, latency, and infrastructure dependency. The question is no longer whether multi-model architectures work. The question is how to orchestrate them: when to decompose tasks, how to route subtasks, what to optimize for, and how to learn across security and compliance boundaries.
+**Accuracy crossover.** Specialized models don't just match frontier on domain tasks — they often exceed it. A 3B model fine-tuned on millions of medical cases develops deeper pattern recognition than a 500B model trained on general web text. For bounded tasks, specialized models are frequently the accuracy-maximizing choice, not a compromise.
+
+**Compliance reality.** Some environments cannot use frontier at all. Classified systems cannot send data to commercial APIs. Healthcare and financial institutions face data residency constraints. Edge deployments have no reliable connectivity. In these contexts, small and micro language models (SLMs and MLMs) aren't a fallback — they're the only path to AI capability.
+
+Each forcing function independently justifies specialized model adoption. Together, they make heterogeneous model architectures an operational inevitability.
+
+The question is not *whether* organizations will operate across model tiers. The question is *how* — deliberately, with intelligent orchestration, or chaotically, with fragmented tooling and no coherent strategy.
+
+Today's multi-model deployments typically shuffle between frontier providers: GPT-4 for reasoning, Claude for writing, Gemini for multimodal. This is model arbitrage, not architectural transformation. Multi-model across *tiers* is fundamentally different. You're routing a 50ms classification to a 125M parameter edge model, a code completion to a 3B fine-tuned model, and only escalating to frontier when the task demands it. The cost differential can be 100x. The latency differential can be 10x. The compliance differential can be binary.
+
+This heterogeneity demands orchestration intelligence: systematic rubrics for decomposition, compliance-gated routing, cross-boundary learning.
 
 This paper introduces **Model Context Intelligence (MCI)**: an architectural pattern for multi-model orchestration. MCI synthesizes ideas from agent frameworks, model routing research, and enterprise patterns into opinionated positions on decomposition (SCALE rubric), routing (compliance gate then CLASSic optimization), context management, and cross-boundary learning. It complements existing SDKs like Microsoft Agent Framework, LangChain, and CrewAI, providing the decision logic they leave open.
 
 ---
 
-## 1. The Fragility Problem
+## 1. The Forcing Functions
+
+Four independent pressures are converging on the same conclusion: heterogeneous model architectures are inevitable.
+
+### 1.1 Infrastructure Concentration Is a Strategic Risk
 
 The current AI architecture concentrates risk at every layer.
 
-**Infrastructure concentration.** Nvidia controls approximately 80% of the AI accelerator market. TSMC fabricates these chips. Advanced packaging capacity (CoWoS) is fully booked through 2025 and constrained through 2026. The April 2024 Taiwan earthquake caused only brief production pauses (TSMC's earthquake-resistant designs held), but it highlighted the concentration risk. The more pressing concern is geopolitical: Taiwan Strait tensions could disrupt access to capacity that cannot be quickly replicated elsewhere.
+Nvidia controls approximately 80% of the AI accelerator market. TSMC fabricates these chips. Advanced packaging capacity (CoWoS) is fully booked through 2025 and constrained through 2026. The April 2024 Taiwan earthquake caused only brief production pauses (TSMC's earthquake-resistant designs held), but it highlighted the concentration risk. The more pressing concern is geopolitical: Taiwan Strait tensions could disrupt access to capacity that cannot be quickly replicated elsewhere.
 
-**Operational concentration.** Most production applications route every request through frontier models requiring this concentrated infrastructure. When your calendar assistant, your code reviewer, your fraud detector, and your research agent all depend on the same GPU clusters, you've created correlated failure modes across your entire AI portfolio.
+Most production applications route every request through frontier models requiring this concentrated infrastructure. When your calendar assistant, your code reviewer, your fraud detector, and your research agent all depend on the same GPU clusters, you've created correlated failure modes across your entire AI portfolio.
 
-**Economic unsustainability.** Enterprise AI spending continues accelerating even as per-token costs fall; usage growth outpaces efficiency gains (Stanford AI Index 2025, Figure 4.3.12). Organizations are paying frontier-model prices for tasks that specialized models handle at 10-50x lower cost (observed 2025 cloud pricing for sub-3B vs. 70B+ parameter models). The economics work only if you assume infinite infrastructure availability at current prices. That assumption is already breaking.
+McKinsey projects $6.7 trillion in data center infrastructure investment needed by 2030 to meet compute demand, with AI workloads driving the majority of growth. But building infrastructure takes years. The gap between demand and capacity is structural, not temporary.
 
-The industry recognizes this. McKinsey projects $6.7 trillion in data center infrastructure investment needed by 2030 to meet compute demand, with AI workloads driving the majority of growth. But building infrastructure takes years. The gap between demand and capacity is structural, not temporary.
+This is not a risk you can insure against. It is a risk you must architect around.
 
-The answer is not more infrastructure for the same architecture. The answer is a different architecture that uses infrastructure more intelligently.
+### 1.2 The Economics Have Crossed Over
 
-**Specialized models are ready.** Phi-3-mini (3.8B parameters) matches Mixtral 8x7B on many benchmarks. Fine-tuned Llama variants approach GPT-4 on domain tasks like text-to-SQL. MobileLLM enables sub-200ms inference on edge devices. The capability exists. What's missing is the intelligence to use it.
+Fine-tuning and training specialized models used to be prohibitively expensive — a frontier-lab luxury. That has changed.
 
-Orchestration is not new. Load balancers route traffic. API gateways manage requests. Workflow engines sequence tasks. But these are mechanical orchestrators: they route based on static rules, round-robin algorithms, or simple capacity metrics. They don't understand what they're routing.
+The cost of training a domain-specialized 3B-7B parameter model has dropped by orders of magnitude since 2022. Open base models (Llama, Mistral, Phi) eliminate the need to train from scratch. LoRA and QLoRA reduce fine-tuning compute to commodity GPU levels. A small team can now produce a domain-specialized model for tens of thousands of dollars — a rounding error compared to enterprise frontier API spend.
 
-Intelligent orchestration is different. It understands task semantics well enough to decompose complex requests into right-sized subtasks. It knows which sub-agents are compliant for which data types before considering performance. It learns from outcomes, not just "did it succeed?" but "how did cost, latency, and accuracy compare to alternatives?" It adapts routing based on observed performance, not just configured rules. It maintains context across multi-step workflows so downstream tasks benefit from upstream decisions.
+Meanwhile, frontier inference costs add up. Stanford's 2025 AI Index reports that per-token costs dropped 280-fold between 2022 and 2024, yet enterprise AI budgets continue rising as usage growth outpaces efficiency gains. Organizations paying $0.01-0.03 per 1K tokens for frontier models could be paying $0.0001-0.001 for specialized SLMs on equivalent tasks.
 
-The gap in the market is not orchestration. It's the decision intelligence that makes orchestration effective: systematic rubrics for decomposition, compliance-aware routing, multi-dimensional optimization, and learning that works across trust boundaries.
+The crossover has occurred: for high-volume, bounded tasks, *building* a specialized model is now cheaper than *renting* frontier inference. And unlike API spend, the specialized model is an asset you own, deploy where you choose, and improve over time.
 
-That decision intelligence is what MCI provides.
+### 1.3 Accuracy Favors Specialization
 
----
+General-purpose models are jacks of all trades. On bounded domain tasks, specialized models increasingly beat them.
 
-## 2. The Power of Specialization
+This is not surprising. A 3B parameter model fine-tuned on millions of medical case studies develops deeper pattern recognition for clinical reasoning than a 500B model trained on general web text. The smaller model has seen more relevant examples per parameter. Its weights are tuned for the task, not diluted across everything from poetry to Python.
 
-Specialized models have moved from "good enough" to "strictly superior" on bounded tasks. This shift stems from a fundamental insight: a model trained or fine-tuned on domain-specific data, with an architecture optimized for specific task patterns, can outperform a general-purpose model orders of magnitude larger.
-
-Why does this work?
-
-**Focused training data.** A 3B parameter model fine-tuned on millions of medical case studies develops deeper pattern recognition for clinical reasoning than a 500B model trained on general web text. The smaller model has seen more relevant examples per parameter.
-
-**Optimized architectures.** Models designed for specific tasks can make architectural trade-offs that general-purpose models cannot. Code models can optimize for syntax patterns. Classification models can optimize for decision boundaries. Retrieval models can optimize for embedding quality.
-
-**Efficient inference.** Smaller models run faster, cheaper, and on more hardware. A model that's 10% more accurate but 50x more expensive isn't better-it's just more expensive. For bounded tasks where the specialized model matches or exceeds accuracy, there's no trade-off at all.
-
-Recent benchmarks illustrate the trend. While specific results vary by evaluation methodology, the pattern is consistent:
+Recent benchmarks illustrate the trend:
 
 | Model | Size | Domain / Task | Observation |
 |-------|------|---------------|-------------|
@@ -67,15 +71,82 @@ Recent benchmarks illustrate the trend. While specific results vary by evaluatio
 | MobileLLM | 125M-350M | On-device classification | Enables sub-200ms inference on mobile hardware |
 | Domain fine-tuned SLMs | 1-8B | Legal, medical, financial | Often outperform base models 10-40x larger on domain tasks |
 
-The implication: the optimal architecture is not one model that does everything. It is many models, each excelling at what it does best, coordinated by an intelligent orchestration layer.
+For tasks where you can define the domain and curate training data, frontier is often not the accuracy-maximizing choice — it's just the default.
 
-This is not a new insight. Frameworks like LangChain, AutoGen, CrewAI, and Microsoft Agent Framework have been exploring multi-model coordination since 2023. What MCI contributes is an opinionated synthesis: specific positions on decomposition, routing, context management, and learning that are rarely given concrete rubrics in existing frameworks.
+### 1.4 Compliance Has No Frontier Option
+
+Some environments cannot use frontier models at all.
+
+Classified government systems cannot send data to commercial APIs. Healthcare organizations processing PHI need deployment configurations that meet specific HIPAA requirements. Financial institutions face data residency constraints that preclude certain cloud regions. Edge deployments — field offices, mobile platforms, disconnected operations — have no reliable connectivity to frontier APIs.
+
+In these environments, SLMs and MLMs are not a compromise or a fallback. They are the only viable path to AI capability. A fine-tuned 7B model running in your enclave is infinitely more useful than a frontier model you cannot legally or physically access.
+
+And as AI becomes essential to operations, "we can't use AI here" stops being acceptable. The pressure to bring capability inside the boundary — the enclave, the air gap, the edge device — will only grow.
+
+### 1.5 Convergence
+
+Each forcing function independently justifies specialized model adoption:
+
+| Forcing Function | Implication |
+|------------------|-------------|
+| Infrastructure risk | Reduce dependency on concentrated frontier supply chain |
+| Economic crossover | Build specialized models instead of renting frontier at scale |
+| Accuracy crossover | Outperform frontier on domain tasks with right-sized models |
+| Compliance reality | Deploy where frontier cannot go |
+
+Together, they make heterogeneous model architectures — spanning micro models at the edge, SLMs on-premises, and frontier in the cloud — not an optimization opportunity but an operational inevitability.
+
+The question is not whether organizations will operate across model tiers. The question is whether they will do it deliberately, with intelligent orchestration, or chaotically, with fragmented tooling and no coherent routing strategy.
+
+---
+
+## 2. The Orchestration Gap
+
+The specialized models exist. The integration protocols exist (MCP). The agent frameworks exist (LangChain, Microsoft Agent Framework, CrewAI). What's missing is the decision intelligence to coordinate them.
+
+### Multi-Model Today vs. Multi-Model Across Tiers
+
+Today's multi-model deployments typically involve shuffling between frontier providers — GPT-4 for reasoning, Claude for writing, Gemini for multimodal. This is model arbitrage, not architectural transformation. The cost differentials are modest. The capability gaps are narrow. The compliance postures are similar. You're choosing between $15-30 per million token options based on vibes or vendor preference.
+
+Multi-model across *tiers* is fundamentally different. You're not choosing between frontier options. You're routing:
+
+- A 50ms classification to a 125M parameter model on the edge
+- A code completion to a 3B fine-tuned model running on-premises
+- A complex legal analysis to a 70B model in a FedRAMP environment
+- A novel research synthesis to frontier — because this is the 5% of tasks that actually need it
+
+The cost differential can be 100x. The latency differential can be 10x. The compliance differential can be binary — possible versus impossible.
+
+This heterogeneity demands orchestration intelligence:
+
+**Decomposition**: When should a complex task be broken into subtasks that can route to different model tiers? A contract review might decompose into clause extraction (SLM), risk classification (SLM), and complex liability analysis (frontier) — but only if the orchestrator understands task structure.
+
+**Routing**: Which sub-agent — wrapping which model in which deployment — should handle this specific task? The answer depends on cost, latency, accuracy requirements, and compliance constraints, evaluated in that order of priority.
+
+**Context**: How do you maintain state across a workflow that spans edge, on-prem, and cloud models with different security boundaries? The edge model's output becomes input to the cloud model, but the workflow state must persist coherently.
+
+**Learning**: How do you improve routing decisions over time without leaking content across trust boundaries? A classified enclave can share that "decomposition pattern X works well for task type Y" without revealing what X or Y contained.
+
+### What Exists vs. What's Missing
+
+Agent frameworks provide primitives for building multi-agent systems. They leave orchestration decisions to the implementer:
+
+| Framework | Provides | Leaves Open |
+|-----------|----------|-------------|
+| LangChain | Tool chaining, agent patterns, memory abstractions | Decomposition rubrics, routing logic, compliance gates |
+| Microsoft Agent Framework | Agent SDK, orchestration patterns, MCP support | Task-to-tier mapping, cross-boundary learning |
+| CrewAI | Role-based coordination, task decomposition | Compliance-aware routing, performance optimization |
+| AutoGen | Multi-agent conversation, learning | Security boundary handling, production hardening |
+
+For environments where compliance is mandatory and auditability is required, "figure it out" isn't sufficient. You need systematic rubrics for decomposition, compliance-gated routing, and cross-boundary learning.
+
+That decision intelligence is what MCI provides.
 
 ---
 
 ## 3. Introducing Model Context Intelligence
 
-Model Context Intelligence is an architectural pattern for coordinating specialized sub-agents across heterogeneous model tiers, not a single product or implementation.
+Model Context Intelligence is an architectural pattern for coordinating specialized sub-agents across heterogeneous model tiers — not a single product or implementation.
 
 ### What MCI Is (and Isn't)
 
@@ -89,7 +160,7 @@ The naming is deliberately parallel to **Model Context Protocol (MCP)**. Where M
 
 The term captures three essential dimensions:
 
-**Model**: The architecture orchestrates across multiple models of different sizes, architectures, and specializations, from micro language models at the edge to frontier models in secure clouds.
+**Model**: The architecture orchestrates across multiple models of different sizes, architectures, and specializations — from micro language models at the edge to frontier models in secure clouds.
 
 **Context**: Intelligence is context-aware across multiple dimensions: conversation history, workflow state, user preferences, security constraints, resource budgets, and observed performance patterns.
 
@@ -97,7 +168,21 @@ The term captures three essential dimensions:
 
 MCP and MCI are complementary layers in a complete AI architecture. MCP provides the foundation for tool access; MCI provides the intelligence for orchestration.
 
-**MCP operates at multiple layers.** The five-layer architecture below shows MCP as Layer 1, the foundation sub-agents use to access tools and data. But MCP can also operate at Layer 4. The orchestration layer could expose itself as an MCP server, allowing external systems to call into MCI as a single tool that triggers the full decomposition/routing/synthesis flow. And the orchestrator could consume MCP servers directly for context that informs routing decisions: compliance status, user preferences, security labels. Information that shapes how tasks get routed, not just how they get executed.
+### MCP as Multi-Layer Protocol
+
+MCP operates across all five layers of the architecture, not just as a foundation for tool access:
+
+| Layer | MCP Role |
+|-------|----------|
+| **Layer 1 (Foundation)** | Sub-agents access tools, APIs, and data sources via MCP servers |
+| **Layer 2 (Model Tier)** | Model endpoints can expose capabilities as MCP tools |
+| **Layer 3 (Sub-Agent)** | Sub-agents can expose themselves as MCP servers for direct invocation |
+| **Layer 4 (Orchestration)** | MCI orchestrator consumes MCP servers for routing context (compliance status, user preferences, security labels) and can expose itself as an MCP server for external callers |
+| **Layer 5 (Application)** | Applications can interact with MCI through MCP rather than custom APIs |
+
+This multi-layer presence means MCP is the connective tissue of the architecture — not just how sub-agents access tools, but how components communicate, how external systems integrate, and how context flows. The orchestrator consuming MCP servers for compliance status means the compliance gate can query live policy systems rather than relying on stale configuration.
+
+MCI provides the decision intelligence. MCP provides the protocol. Together they form a complete orchestration architecture where routing decisions are informed by real-time context from across the system.
 
 ---
 
@@ -132,7 +217,24 @@ Same model. Same fine-tuning. Four different sub-agents with different complianc
 
 This decoupling matters because MCI routes to sub-agents, not models. The routing decision considers both deployment properties (compliance, residency, availability) and observed performance (cost, latency, accuracy). A sub-agent's performance reflects the combination of its underlying model and its deployment environment.
 
-**Sub-agents encapsulate capability, not just access.** The wrapper ecosystem’s frustration is that you can connect to dozens of models but lose critical capabilities when you leave the major providers. Grounding (RAG), tool use, structured outputs, function calling: these aren’t standardized across models. A sub-agent solves this by encapsulating the model plus its capability bindings. The RAG pipeline, the tool definitions, the output schemas, the prompt templates that make a particular model work well for a particular task: all of that lives in the sub-agent. The orchestration layer routes to a sub-agent that can do “contract analysis with clause extraction.” It doesn’t know or care whether that sub-agent uses RAG, fine-tuning, or a 200-line system prompt to get there. This isolation means you can swap implementations, upgrade models, or change grounding strategies without touching orchestration logic.
+**Sub-agents encapsulate capability, not just access.** The wrapper ecosystem's frustration is that you can connect to dozens of models but lose critical capabilities when you leave the major providers. Grounding (RAG), tool use, structured outputs, function calling: these aren't standardized across models. A sub-agent solves this by encapsulating the model plus its capability bindings. The RAG pipeline, the tool definitions, the output schemas, the prompt templates that make a particular model work well for a particular task: all of that lives in the sub-agent. The orchestration layer routes to a sub-agent that can do "contract analysis with clause extraction." It doesn't know or care whether that sub-agent uses RAG, fine-tuning, or a 200-line system prompt to get there. This isolation means you can swap implementations, upgrade models, or change grounding strategies without touching orchestration logic.
+
+### Hybrid Coordination: Control Plane + Distributed Execution
+
+MCI's architecture is deliberately hybrid: centralized decision-making with distributed execution.
+
+| Layer | Coordination Model | Rationale |
+|-------|-------------------|-----------|
+| Policy & Compliance | Centralized (Context Manager + Compliance Gate) | Non-negotiable. Gates, audit, intervention capability. |
+| Task Routing | Centralized (Intelligent Router) | Requires global view of sub-agent capabilities, load, compliance status. |
+| Task Execution | Distributed (Sub-agents do the work) | Parallelism, specialization, horizontal scale. |
+| Agent Collaboration | Peer-to-peer (within authorized workflows) | Lightweight handoffs, clarification, intermediate artifacts. |
+
+This isn't a contradiction — it's separation of concerns. Agents can communicate directly during execution (share intermediate results, request clarification, hand off subtasks) without routing everything through a central coordinator. But they cannot *start* work or *complete* work without control plane authorization.
+
+The control plane isn't a bottleneck — it's a checkpoint. And in compliance-constrained environments, checkpoints are features, not bugs.
+
+Some architectures optimize for autonomous agent coordination, letting agents self-organize through messaging protocols, @mentions, and emergent collaboration. This works well for loosely coupled workflows where compliance is advisory. But **scaling self-management is incongruent with regulation and compliance.** When you need to prove that PHI never touched a non-HIPAA system, or that classified data never left the enclave, you need a control plane that enforced that constraint — not a log that shows it happened to work out.
 
 ---
 
@@ -148,7 +250,7 @@ The Workflow Orchestrator is the entry point for every request. Its job: decide 
 
 **Alternatives to consider:** Python if the orchestrator relies heavily on LLM-based classification for SCALE assessment, since Python offers tighter integration with ML tooling. Java/Kotlin for enterprises with existing JVM infrastructure and teams.
 
-This is not a trivial decision. Decomposition adds orchestration overhead. For simple tasks, sending directly to a capable model may be faster and cheaper. For complex tasks, decomposition enables parallel execution and right-sized model selection. For safety-critical tasks, decomposition may be too risky-or may require redundant validation paths.
+This is not a trivial decision. Decomposition adds orchestration overhead. For simple tasks, sending directly to a capable model may be faster and cheaper. For complex tasks, decomposition enables parallel execution and right-sized model selection. For safety-critical tasks, decomposition may be too risky — or may require redundant validation paths.
 
 #### The SCALE Rubric
 
@@ -228,6 +330,10 @@ Compliance encompasses all regulatory and policy requirements: Does the sub-agen
 
 Any sub-agent that fails compliance requirements for the task is excluded. Only compliant sub-agents proceed to Phase 2.
 
+The compliance gate is not just a filter — it's the architectural primitive that makes MCI viable for regulated environments. Without it, routing optimization could inadvertently select a faster, cheaper sub-agent that violates data residency requirements. The gate ensures that performance optimization only occurs within the set of compliant options.
+
+This is why compliance is a gate (pass/fail) rather than a dimension in CLASSic scoring. You cannot trade compliance for performance. A sub-agent that's 50% faster but violates HIPAA isn't a performance win — it's a regulatory violation. The two-phase architecture makes this constraint structural, not policy-dependent.
+
 #### Phase 2: CLASSic Performance Scoring
 
 For compliant sub-agents, the Router applies **CLASSic** (Aisera, ICLR 2025) to evaluate observed performance:
@@ -246,9 +352,9 @@ These dimensions are measured at the sub-agent level as observed in production, 
 
 Two levels of evaluation matter here:
 
-**Model benchmarks** (MMLU, HumanEval, MATH, GPQA, SWE-Bench) are agent-agnostic tests of raw model capability. They answer questions like: Is this model good at code generation? How well does it reason about math? These benchmarks inform **design-time decisions**, specifically which model to wrap when building a sub-agent for a particular task type. A code-review sub-agent might wrap a model with strong HumanEval scores; a knowledge-QA sub-agent might prioritize MMLU performance.
+**Model benchmarks** (MMLU, HumanEval, MATH, GPQA, SWE-Bench) are agent-agnostic tests of raw model capability. They answer questions like: Is this model good at code generation? How well does it reason about math? These benchmarks inform **design-time decisions** — specifically which model to wrap when building a sub-agent for a particular task type. A code-review sub-agent might wrap a model with strong HumanEval scores; a knowledge-QA sub-agent might prioritize MMLU performance.
 
-**CLASSic** evaluates sub-agent performance across operational dimensions. It answers questions like: How does this sub-agent actually perform in production on cost, latency, accuracy, stability, and security? CLASSic informs **runtime routing decisions**, specifically which sub-agent to select for a given task.
+**CLASSic** evaluates sub-agent performance across operational dimensions. It answers questions like: How does this sub-agent actually perform in production on cost, latency, accuracy, stability, and security? CLASSic informs **runtime routing decisions** — specifically which sub-agent to select for a given task.
 
 Model benchmarks are inputs to sub-agent design. CLASSic is the basis for sub-agent selection. The Router operates on CLASSic scores observed in production, not raw model benchmarks.
 
@@ -285,7 +391,7 @@ Compliance is a gate. Performance is a gradient.
 
 ### Component 3: Context Manager (Rust)
 
-The Context Manager maintains all state across the workflow. Sub-agents are stateless by design-they receive context, do work, return results. The Context Manager owns the memory.
+The Context Manager maintains all state across the workflow. Sub-agents are stateless by design — they receive context, do work, return results. The Context Manager owns the memory.
 
 **Language choice:** Rust. Context is critical state. Corruption or race conditions in context management can cause cascading failures across the entire workflow. Rust's ownership model and compile-time guarantees provide correctness assurances that matter for this component.
 
@@ -301,15 +407,31 @@ The Context Manager maintains all state across the workflow. Sub-agents are stat
 | Security constraints | Classification level, allowed operations | Policy-defined |
 | Resource budgets | Token limits, cost ceiling, latency SLA | Request-scoped |
 
+#### Operational vs. Forensic Auditability
+
+A critical distinction: MCI provides **operational auditability**, not merely forensic auditability.
+
+**Forensic auditability** means you can reconstruct what happened after the fact — trace the message chain, analyze logs, piece together the workflow post-hoc. By the time you've reconstructed it, the action already happened. The data already moved. The decision already executed.
+
+**Operational auditability** means you know what's happening right now, why it's happening, and you can intervene before execution. The Context Manager provides:
+
+- **Pre-execution visibility:** What workflows are active, what state each is in, what agents are engaged
+- **Real-time intervention:** Stop a workflow before a non-compliant action executes
+- **Policy enforcement at decision time:** Compliance gates fire before routing, not after
+
+Distributed coordination approaches (where agents self-organize through peer-to-peer messaging) can achieve forensic auditability — you can trace the @mention chain after the fact. But they struggle with operational auditability because there's no central point that knows the full workflow state in real time.
+
+For regulated environments, forensic reconstruction isn't sufficient. You need a control plane that can answer "what is happening right now?" and "should this be allowed to proceed?" The Context Manager, combined with the compliance gate, provides that control plane.
+
 #### Architectural Position: MCI Owns Memory
 
-**Default to indefinite persistence.** Too many cycles with models are spent relearning things already known. If MCI is the orchestration layer, then MCI is where context lives-not the models. The models are stateless workers.
+**Default to indefinite persistence.** Too many cycles with models are spent relearning things already known. If MCI is the orchestration layer, then MCI is where context lives — not the models. The models are stateless workers.
 
 Regulated environments can configure retention policies (flush after request, TTL, scope limits) as overrides. But the architectural default assumes persistence because relearning is wasteful.
 
 #### Representation: Declarative Structure, Learned Content
 
-**Structure is declarative.** The categories of context (user preferences, workflow state, conversation history, constraints) are schema-defined-inspectable, queryable, auditable.
+**Structure is declarative.** The categories of context (user preferences, workflow state, conversation history, constraints) are schema-defined — inspectable, queryable, auditable.
 
 **Content can be learned.** Within those categories, content may use learned representations: summaries for long histories, embeddings for semantic retrieval, compression for efficiency.
 
@@ -367,7 +489,7 @@ Conflicts are resolved via pre-configured MCI policies:
 | Partial overlap | Deduplicate, merge unique information |
 | Missing subtask output | Note gap if critical, omit if optional |
 
-The Synthesizer does not make judgment calls-it follows policy. This keeps synthesis auditable and predictable.
+The Synthesizer does not make judgment calls — it follows policy. This keeps synthesis auditable and predictable.
 
 ---
 
@@ -449,7 +571,7 @@ This approach is compliant by design. It offers different tradeoffs than federat
 
 ## 6. Sub-Agent SDK
 
-The Sub-Agent SDK is a core deliverable-the standard interface that enables ecosystem development.
+The Sub-Agent SDK is a core deliverable — the standard interface that enables ecosystem development.
 
 ### What It Defines
 
@@ -477,7 +599,7 @@ A critical question: where do decomposition templates come from?
 
 ### Position: Hybrid with Active Elicitation
 
-Workflow discovery is human-guided but machine-assisted. Rather than asking users to validate proposed decompositions once, the system engages in **iterative clarification**-asking the same underlying question in multiple formulations to reduce noise and surface true intent.
+Workflow discovery is human-guided but machine-assisted. Rather than asking users to validate proposed decompositions once, the system engages in **iterative clarification** — asking the same underlying question in multiple formulations to reduce noise and surface true intent.
 
 Example elicitation sequence for a task "analyze this contract":
 
@@ -514,7 +636,7 @@ In the 2000s, enterprises learned that monolithic applications couldn't scale. T
 
 **Phase 2: Orchestration (Kubernetes)**
 
-Decomposition created a new problem: managing hundreds of services across thousands of containers. The solution was a control plane, Kubernetes, that handled scheduling, scaling, self-healing, and service discovery. The control plane abstracted infrastructure complexity, letting developers focus on services rather than servers.
+Decomposition created a new problem: managing hundreds of services across thousands of containers. The solution was a control plane — Kubernetes — that handled scheduling, scaling, self-healing, and service discovery. The control plane abstracted infrastructure complexity, letting developers focus on services rather than servers.
 
 **AI is following the same path:**
 
@@ -538,7 +660,7 @@ Organizations that survived the microservices transition, and then the Kubernete
 
 ## 9. Domain Vignettes: MCI Across Industries
 
-The patterns MCI describes apply wherever organizations face constraints on cost, compliance, latency, or data boundaries. The following illustrative scenarios show how the same architectural decisions manifest in different contexts. These are not case studies-they are thought experiments demonstrating MCI's applicability across domains.
+The patterns MCI describes apply wherever organizations face constraints on cost, compliance, latency, or data boundaries. The following illustrative scenarios show how the same architectural decisions manifest in different contexts. These are not case studies — they are thought experiments demonstrating MCI's applicability across domains.
 
 ### Vignette 1: Commercial SaaS (Multi-Tenant Cost Optimization)
 
@@ -550,13 +672,13 @@ A B2B SaaS platform provides AI-powered document analysis to thousands of custom
 
 The Workflow Orchestrator applies SCALE to incoming documents. Structure assessment reveals that most documents decompose naturally: extract metadata, classify type, route specialized analysis. Experience data shows that 73% of documents are routine types (invoices, receipts, simple agreements) where specialized sub-agents match frontier accuracy.
 
-The Intelligent Router's compliance gate is straightforward here-all sub-agents meet SOC2, all data stays in the platform's cloud. CLASSic optimization focuses on Cost and Latency, with Accuracy thresholds per document type.
+The Intelligent Router's compliance gate is straightforward here — all sub-agents meet SOC2, all data stays in the platform's cloud. CLASSic optimization focuses on Cost and Latency, with Accuracy thresholds per document type.
 
 The Adaptive Learning System discovers that certain customer segments (legal, healthcare) have higher accuracy requirements. It learns to weight Accuracy higher for those tenant profiles without explicit configuration.
 
 **Illustrative Impact.** In this scenario, inference costs could drop significantly (potentially 50-70%) while latency improves substantially. The margin unlocked funds further model specialization, creating a flywheel effect.
 
-**Key MCI Contribution.** SCALE's Experience dimension prevented premature optimization-novel document types still route to frontier until pattern confidence builds.
+**Key MCI Contribution.** SCALE's Experience dimension prevented premature optimization — novel document types still route to frontier until pattern confidence builds.
 
 ---
 
@@ -570,7 +692,7 @@ A healthcare payer processes millions of claims monthly. AI could accelerate adj
 
 The compliance gate dominates routing decisions. Before any performance optimization, the Router filters sub-agents by: HIPAA certification status, state-specific regulatory compliance, PHI handling authorization, and data residency requirements. A claim from a California Medicaid patient routes only to sub-agents certified for that specific regulatory intersection.
 
-SCALE's Consequence dimension governs decomposition. Pharmacy claims (high volume, well-understood) decompose freely. Complex surgical claims with potential fraud indicators route atomically to specialized sub-agents-the risk of decomposition error exceeds the efficiency gain.
+SCALE's Consequence dimension governs decomposition. Pharmacy claims (high volume, well-understood) decompose freely. Complex surgical claims with potential fraud indicators route atomically to specialized sub-agents — the risk of decomposition error exceeds the efficiency gain.
 
 The Context Manager maintains claim history across the member's lifetime, enabling pattern detection (potential fraud, care gaps) while enforcing strict access boundaries. The Adaptive Learning System shares patterns across the enterprise ("claims with characteristic X have 3x denial rate") without sharing any PHI.
 
@@ -590,7 +712,7 @@ An intelligence organization processes information across classification levels.
 
 MCI deploys hierarchically: local coordinators at edge locations, enclave coordinators at each classification level, and no coordinator that spans levels. Each enclave operates its own complete MCI stack with sub-agents certified for that classification.
 
-The compliance gate is absolute. A task tagged TS/SCI routes only to sub-agents in the TS/SCI enclave. There is no "almost compliant." The Router at each level has visibility only into sub-agents at that level-cross-enclave routing doesn't exist.
+The compliance gate is absolute. A task tagged TS/SCI routes only to sub-agents in the TS/SCI enclave. There is no "almost compliant." The Router at each level has visibility only into sub-agents at that level — cross-enclave routing doesn't exist.
 
 Edge deployments run with micro models locally. When connectivity exists, the Coordinator syncs patterns (not content) with the regional coordinator. When connectivity drops, local MCI continues operating on cached patterns and local sub-agents.
 
@@ -625,6 +747,7 @@ This paper takes specific positions on open questions. These represent our consi
 
 | Question | Position | Rationale |
 |----------|----------|-----------|
+| Multi-tier necessity | Inevitable, not optional | Four forcing functions converge: infrastructure risk, economic crossover, accuracy crossover, compliance reality |
 | Sub-agent/model relationship | Decoupled; same model can power multiple sub-agents with different deployment properties | Compliance is a deployment property, not a model property |
 | Routing targets | Route to sub-agents, not models; CLASSic measures observed sub-agent performance | Sub-agents combine model capability with deployment context |
 | Routing architecture | Compliance gate, then CLASSic optimization | Compliance is pass/fail; performance is a gradient |
@@ -633,6 +756,8 @@ This paper takes specific positions on open questions. These represent our consi
 | Cross-enclave learning | Patterns only, never content | Compliant by design, auditable |
 | Context persistence | Default indefinite; MCI owns memory | Relearning is wasteful |
 | Context representation | Declarative structure, learned content | Debuggable yet flexible |
+| Coordination model | Centralized control plane, distributed execution | Scaling self-management is incongruent with compliance |
+| Auditability | Operational (real-time), not just forensic (post-hoc) | Regulated environments need intervention capability |
 
 ---
 
@@ -642,7 +767,7 @@ MCI exists in a crowded field. This section clarifies what MCI contributes relat
 
 ### The Distinction: SDKs vs. Decision Frameworks
 
-Most prior work in this space provides **SDKs and toolkits**, libraries that give developers primitives for building agent systems. MCI provides an **architectural pattern** with opinionated guidance on how to use those primitives in production environments with real constraints.
+Most prior work in this space provides **SDKs and toolkits** — libraries that give developers primitives for building agent systems. MCI provides an **architectural pattern** with opinionated guidance on how to use those primitives in production environments with real constraints.
 
 Use LangChain, Microsoft Agent Framework, or CrewAI to build your system. Use MCI's rubrics to make operational decisions within that system.
 
@@ -662,19 +787,27 @@ Use LangChain, Microsoft Agent Framework, or CrewAI to build your system. Use MC
 
 **vLLM Semantic Router** (evolved to Signal-Decision, November 2025) demonstrated learned routing between models based on query characteristics. MCI adopts similar routing concepts but adds the compliance gate as a prerequisite phase and structures performance optimization around CLASSic dimensions.
 
-**Ray Serve** provides distributed model serving with autoscaling. MCI operates at a higher abstraction layer-Ray Serve could be an implementation substrate for MCI sub-agents.
+**Ray Serve** provides distributed model serving with autoscaling. MCI operates at a higher abstraction layer — Ray Serve could be an implementation substrate for MCI sub-agents.
 
 **Semantic Kernel** (Microsoft, 2023+) offered plugin-based orchestration with planner capabilities before its unification into Microsoft Agent Framework.
 
+### Distributed Agent Coordination
+
+Emerging platforms like **AX Platform** explore peer-to-peer agent collaboration, where agents self-organize through messaging, @mentions, and emergent coordination patterns. This approach optimizes for autonomy and horizontal scale — agents communicate directly without central orchestration.
+
+MCI takes a different position: **centralized control plane with distributed execution**. For loosely coupled workflows where compliance is advisory, emergent coordination works well. For regulated environments where you must prove data never crossed boundaries, you need a control plane that enforced constraints — not logs that show constraints happened to hold.
+
+The distinction is operational vs. forensic auditability. Distributed coordination can reconstruct what happened. Centralized control planes know what's happening and can intervene. Both are valid architectures for different constraint profiles.
+
 ### Evaluation Frameworks
 
-**CLASSic** (Aisera, ICLR 2025) provides the Cost, Latency, Accuracy, Stability, Security rubric that MCI adopts for sub-agent evaluation. We apply CLASSic with specific scoring methods and workflow weight profiles but did not create the framework. Our contribution is positioning CLASSic as a runtime optimization layer that operates after compliance gating-not as a complete routing solution.
+**CLASSic** (Aisera, ICLR 2025) provides the Cost, Latency, Accuracy, Stability, Security rubric that MCI adopts for sub-agent evaluation. We apply CLASSic with specific scoring methods and workflow weight profiles but did not create the framework. Our contribution is positioning CLASSic as a runtime optimization layer that operates after compliance gating — not as a complete routing solution.
 
 **Model benchmarks** (MMLU, HumanEval, MATH, GPQA, SWE-Bench) inform sub-agent design decisions. MCI distinguishes design-time model selection (informed by benchmarks) from runtime sub-agent routing (informed by CLASSic).
 
 ### Research on Model Routing
 
-**Leeroo Orchestration of Experts** demonstrated training an orchestrator on benchmark performance for intelligent model routing. This represents static learned routing-pre-computing which model handles which query type based on benchmark runs. MCI's adaptive learning operates at runtime with production feedback, learning across multiple dimensions (not just accuracy) and adapting to observed performance.
+**Leeroo Orchestration of Experts** demonstrated training an orchestrator on benchmark performance for intelligent model routing. This represents static learned routing — pre-computing which model handles which query type based on benchmark runs. MCI's adaptive learning operates at runtime with production feedback, learning across multiple dimensions (not just accuracy) and adapting to observed performance.
 
 ### What MCI Contributes
 
@@ -685,79 +818,104 @@ Given this context, MCI's contribution is synthesis and opinion for production e
 - **Two-phase routing architecture:** compliance gate (pass/fail) before CLASSic optimization (gradient)
 - **Cross-enclave learning constraint:** patterns propagate, content never crosses boundaries
 - **Sub-agent/model decoupling rationale:** compliance is a deployment property, enabling the same model in multiple sub-agents with different compliance postures
+- **Hybrid coordination model:** centralized control plane for policy/routing, distributed execution for scale, peer collaboration within authorized workflows
+- **Four forcing functions framework:** infrastructure risk, economic crossover, accuracy crossover, compliance reality as converging pressures toward multi-tier architectures
 
 **Architectural positions:**
 - Specific language recommendations per component (Go for orchestration, Rust for routing, Python for learning)
-- Integration model with MCP as complementary layer
+- Integration model with MCP as multi-layer connective tissue
 - Context persistence defaults (indefinite, owned by MCI)
 - Cold-start strategy (conservative first, optimize as data accumulates)
+- Operational auditability as requirement, not just forensic reconstruction
 
 **What we deliberately don't provide:**
 - An SDK (use Microsoft Agent Framework, LangChain, or others)
 - A runtime (deploy on Kubernetes, Ray Serve, or cloud platforms)
 - Model recommendations (benchmarks evolve too quickly)
 
-MCI is opinionated where existing frameworks are flexible. For environments where "it depends" isn't acceptable-where auditability, compliance, and mission-criticality constrain choices-MCI provides concrete positions to adopt, adapt, or argue against.
+MCI is opinionated where existing frameworks are flexible. For environments where "it depends" isn't acceptable — where auditability, compliance, and mission-criticality constrain choices — MCI provides concrete positions to adopt, adapt, or argue against.
 
 ---
 
 ## 12. Call for Collaboration
 
-This paper proposes an architecture with specific positions. It is not a complete specification; it is an invitation to collaboration.
+This paper represents architectural thinking, not a finished implementation. The positions taken here require refinement, challenge, and production validation.
 
-### What We've Defined
+### What We're Looking For
 
-- SCALE rubric for task decomposition with application mechanics
-- CLASSic rubric adoption for sub-agent evaluation with application mechanics
-- Eight-component architecture with implementation language recommendations
-- Five-layer stack from MCP foundation to application interface
-- Positions on key architectural questions with rationale
+**Domain expertise.** The healthcare and government vignettes reflect general patterns, not deep operational knowledge. Practitioners in these domains can identify where MCI's assumptions break down.
 
-### What Requires Community Input
+**Implementation experience.** Teams building multi-model systems encounter constraints and patterns not captured here. Production feedback sharpens architectural guidance.
 
-- Sub-Agent SDK specification details
-- MCP extensions for orchestration primitives
-- Benchmark frameworks for comparing MCI implementations
-- Reference implementations demonstrating patterns
-- Refinement of SCALE and CLASSic dimensions and weightings
-- Additional failure modes and recovery strategies
+**Research partnerships.** The Adaptive Learning System's patterns-only constraint needs formal analysis. What privacy guarantees does it actually provide? How does it compare to differential privacy or federated learning for specific threat models?
+
+**Benchmark development.** CLASSic provides dimensions; specific measurement methodologies for each dimension in different contexts remain underdeveloped.
+
+### How to Contribute
+
+This paper is published at github.com/pbpuckett3/mci-pattern-wp. Issues, pull requests, and forks are welcome.
+
+For substantial collaboration inquiries: paul@relentlesspursuits.io
 
 ---
 
 ## Conclusion
 
-Multi-model orchestration is not new. The industry is converging on this pattern-Microsoft's unification of Semantic Kernel and AutoGen into the Agent Framework (October 2025), continued evolution of LangChain and CrewAI, and growing research on intelligent routing all point the same direction.
+Four forcing functions — infrastructure risk, economic crossover, accuracy crossover, and compliance reality — are converging on the same conclusion: heterogeneous model architectures are inevitable. Organizations will operate across model tiers, from micro models at the edge to frontier models in secure clouds, whether they plan for it or not.
 
-What's maturing is our understanding of how to make operational decisions within these systems: when to decompose, how to route, what to optimize for, and how to learn across boundaries. These are the questions MCI attempts to answer.
+The specialized models exist. The integration protocols exist. The agent frameworks exist. What's been missing is a coherent framework for combining them in production environments where compliance is mandatory, auditability is required, and "it depends" isn't an acceptable architecture.
 
-MCI is not an SDK; use Microsoft Agent Framework, LangChain, or others for implementation. MCI is not a runtime; deploy on Kubernetes, Ray Serve, or cloud platforms. MCI is an architectural pattern with decision rubrics: SCALE for decomposition, CLASSic for routing optimization (after compliance gating), patterns-only for cross-boundary learning.
+MCI provides that framework: when to decompose (SCALE), how to route (compliance gate then CLASSic), what to track (Context Manager), how to learn (patterns only across boundaries). These are opinionated positions, not universal truths. They reflect the constraints of regulated industries and mission-critical deployments.
 
-The value is opinion, not novelty. In environments where "it depends" is an unsatisfying answer, MCI provides concrete positions that can be adopted, adapted, or argued against.
+The question is no longer whether multi-tier model architectures work. It is whether organizations will adopt them deliberately — with intelligent orchestration — or be forced into them reactively, with fragmented tooling and no coherent strategy.
 
-We offer this as a contribution to the community-complementary to existing tools, not competitive with them. The conversation about how to do multi-model orchestration well is just beginning.
+MCI is a pattern for the former. Not a product. Not an SDK. A framework for building systems that work when the constraints are real.
 
 ---
 
 ## References
 
-1. **Model Context Protocol (MCP)**. Anthropic, 2024. https://modelcontextprotocol.io
+**Industry Analysis**
+- Stanford HAI. "Artificial Intelligence Index Report 2025." Stanford University, April 2025.
+- McKinsey Global Institute. "AI Infrastructure: The Engine of the AI Era." McKinsey & Company, 2024.
+- "TSMC Earthquake Response and Recovery." TSMC Quarterly Investor Briefing, Q2 2024.
 
-2. **CLASSic: Cost, Latency, Accuracy, Stability, Security Framework for Enterprise AI Agents**. Aisera. Presented at ICLR 2025 Workshop on Building Trust in LLMs and LLM Applications. https://aisera.com/ai-agents-evaluation/
+**Model Research**
+- Abdin et al. "Phi-3 Technical Report: A Highly Capable Language Model Locally on Your Phone." Microsoft Research, April 2024.
+- Liu et al. "MobileLLM: Optimizing Sub-billion Parameter Language Models for On-Device Use Cases." Meta AI Research, February 2024.
+- Dubey et al. "The Llama 3 Herd of Models." Meta AI, July 2024.
+- Mishra et al. "Granite Code Models: A Family of Open Foundation Models for Code Intelligence." IBM Research, May 2024.
 
-3. **Signal-Decision Driven Architecture: Reshaping Semantic Routing at Scale**. vLLM Project, November 2025. https://blog.vllm.ai/2025/11/19/signal-decision.html
+**Agent Frameworks**
+- Microsoft. "Microsoft Agent Framework Documentation." Microsoft Learn, 2025.
+- Chase, H. "LangChain Documentation." LangChain Inc., 2022-2025.
+- Wu, Q., et al. "AutoGen: Enabling Next-Gen LLM Applications via Multi-Agent Conversation." Microsoft Research, September 2023.
+- Moura, J. "CrewAI Documentation." CrewAI, 2023-2025.
 
-4. **Introducing Microsoft Agent Framework**. Microsoft, October 2025. https://devblogs.microsoft.com/foundry/introducing-microsoft-agent-framework-the-open-source-engine-for-agentic-ai-apps/
+**Routing and Orchestration**
+- vLLM Project. "Semantic Router / Signal-Decision Documentation." vLLM, 2024-2025.
+- Kwon, W., et al. "Efficient Memory Management for Large Language Model Serving with PagedAttention." SOSP 2023.
+- Aisera. "CLASSic: A Framework for LLM Performance Evaluation." ICLR 2025.
+- Leeroo AI. "Orchestration of Experts: Learning to Route for Mixture of LLMs." 2024.
 
-5. **LangChain Documentation**. LangChain, Inc. https://docs.langchain.com
+**Distributed Agent Coordination**
+- AX Platform. "The Agentic Experience." ax-platform.com, 2025.
+- AX Platform. "AX: MCP-Native Collaboration for AI Agents." acflow.substack.com, 2025.
 
-6. **CrewAI Documentation**. CrewAI. https://docs.crewai.com
+**Protocol Standards**
+- Anthropic. "Model Context Protocol Specification." Anthropic, November 2024.
 
-7. **AI Index Report 2025**. Stanford University Human-Centered Artificial Intelligence. https://aiindex.stanford.edu/report/
+**Architectural Precedent**
+- Burns, B., et al. "Kubernetes: Up and Running." O'Reilly Media, Third Edition, 2022.
+- Newman, S. "Building Microservices." O'Reilly Media, Second Edition, 2021.
 
 ---
 
 ## About the Author
 
-Paul Puckett is Chief Technology Officer at Clarity Innovations and founder/CEO of Relentless Pursuits Consulting Group. His work focuses on AI architecture, distributed systems, and cyber operations for defense and regulated industries. He previously held senior leadership roles at the National Geospatial-Intelligence Agency and the Army.
+**Paul Puckett** is Chief Technology Officer at Clarity Innovations and founder and CEO of Relentless Pursuits Consulting Group. He previously served as Director of the U.S. Army's Enterprise Cloud Management Agency (ECMA), where he managed the Army's $800M+ cloud portfolio and led the transformation that took the Army from the slowest to the fastest cloud adopter in the federal government globally.
 
-For collaboration inquiries: [linkedin.com/in/pbp3](https://linkedin.com/in/pbp3)
+His work spans defense technology, enterprise architecture, and AI systems design, with particular focus on mission-critical deployments where compliance and auditability are non-negotiable constraints.
+
+Contact: paul@relentlesspursuits.io
+GitHub: github.com/pbpuckett3
