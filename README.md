@@ -2,13 +2,18 @@
 
 An architectural pattern for intelligent multi-model orchestration.
 
-## The Problem
+## The Forcing Functions
 
-Frontier model inference depends on concentrated infrastructure: GPUs from one company, fabricated by one foundry, with packaging capacity constrained through 2026. Organizations route every task through these same models, creating correlated failure modes and economic inefficiency.
+Four independent pressures are converging on the same conclusion: heterogeneous model architectures are inevitable.
 
-Specialized models under 3B parameters now match frontier performance on bounded tasks at 10-50x lower cost. The capability exists. What's missing is the intelligence to use it.
+| Forcing Function | Implication |
+|------------------|-------------|
+| **Infrastructure Risk** | Concentrated GPU supply chain is a strategic vulnerability |
+| **Economic Crossover** | Fine-tuning specialized models is now cheaper than frontier inference at scale |
+| **Accuracy Crossover** | Specialized models often exceed frontier on domain tasks |
+| **Compliance Reality** | Some environments have no frontier option — SLMs are the only path |
 
-Orchestration exists. Load balancers route traffic. API gateways manage requests. But these are mechanical orchestrators: they route based on static rules, not task semantics.
+Organizations will operate across model tiers whether they plan for it or not. The question is whether that transition happens deliberately — with intelligent orchestration — or chaotically.
 
 ## The Pattern
 
@@ -37,6 +42,19 @@ Where should each task go?
 
 Compliance is non-negotiable. Performance is a gradient within compliant options.
 
+### Hybrid Coordination
+
+How do we balance control with scale?
+
+| Layer | Coordination Model |
+|-------|-------------------|
+| Policy & Compliance | Centralized (Context Manager + Compliance Gate) |
+| Task Routing | Centralized (Intelligent Router) |
+| Task Execution | Distributed (Sub-agents do the work) |
+| Agent Collaboration | Peer-to-peer (within authorized workflows) |
+
+**Scaling self-management is incongruent with regulation and compliance.** You need a control plane that enforces constraints — not logs that show constraints happened to hold.
+
 ### Patterns-Only Learning
 
 How do we improve across security boundaries?
@@ -48,11 +66,17 @@ Learning operates on patterns, never content:
 
 Patterns propagate across enclaves. Content stays put.
 
+## Architecture
+
+![MCI Architecture](docs/images/mci_architecture_diagram.png)
+
+*MCP as the universal connective tissue: centralized control plane for policy/routing, distributed execution for scale, peer collaboration within authorized workflows.*
+
 ## Documentation
 
 📄 **[Whitepaper: Intelligent Orchestration for the Multi-Model Era](docs/MCI_Whitepaper_Puckett.md)** ([PDF](docs/MCI_Whitepaper_Puckett.pdf))
 
-Covers the full architectural pattern: eight components, five layers, implementation guidance, and domain vignettes.
+Covers the full architectural pattern: forcing functions, eight components, five layers, implementation guidance, and domain vignettes.
 
 ## Implementation
 
@@ -62,6 +86,14 @@ MCI is a pattern, not an SDK. Implement it with:
 - [CrewAI](https://docs.crewai.com)
 
 Or build your own. The pattern is what matters.
+
+## Recent Updates (December 2025)
+
+- **Forcing Functions Framework**: Restructured around four converging pressures driving multi-tier adoption
+- **Hybrid Coordination Model**: Centralized control plane + distributed execution
+- **Operational vs. Forensic Auditability**: Why real-time control matters for regulated environments
+- **Architecture Diagram**: Visual showing MCP as multi-layer connective tissue
+- **Verified Economics**: Updated cost differentials with 2025 pricing data
 
 ## Status
 
