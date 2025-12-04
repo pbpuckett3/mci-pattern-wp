@@ -97,6 +97,8 @@ The term captures three essential dimensions:
 
 MCP and MCI are complementary layers in a complete AI architecture. MCP provides the foundation for tool access; MCI provides the intelligence for orchestration.
 
+**MCP operates at multiple layers.** The five-layer architecture below shows MCP as Layer 1, the foundation sub-agents use to access tools and data. But MCP can also operate at Layer 4. The orchestration layer could expose itself as an MCP server, allowing external systems to call into MCI as a single tool that triggers the full decomposition/routing/synthesis flow. And the orchestrator could consume MCP servers directly for context that informs routing decisions: compliance status, user preferences, security labels. Information that shapes how tasks get routed, not just how they get executed.
+
 ---
 
 ## 4. Five-Layer Architecture
