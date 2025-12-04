@@ -21,7 +21,7 @@ Each forcing function independently justifies specialized model adoption. Togeth
 
 The question is not *whether* organizations will operate across model tiers. The question is *how* — deliberately, with intelligent orchestration, or chaotically, with fragmented tooling and no coherent strategy.
 
-Today's multi-model deployments typically shuffle between frontier providers: GPT-4 for reasoning, Claude for writing, Gemini for multimodal. This is model arbitrage, not architectural transformation. Multi-model across *tiers* is fundamentally different. You're routing a 50ms classification to a 125M parameter edge model, a code completion to a 3B fine-tuned model, and only escalating to frontier when the task demands it. The cost differential can be 100x. The latency differential can be 10x. The compliance differential can be binary.
+Today's multi-model deployments typically shuffle between frontier providers: GPT-4 for reasoning, Claude for writing, Gemini for multimodal. This is switching between frontier options, not architectural transformation. Multi-model across *tiers* is fundamentally different. You're routing a 50ms classification to a 125M parameter edge model, a code completion to a 3B fine-tuned model, and only escalating to frontier when the task demands it. When frontier models command $2.50-15 per million tokens and specialized SLMs run at $0.15-0.70, the cost differential can reach 20-100x depending on model choice — and self-hosted deployments push that further. The latency differential can be substantial. The compliance differential can be binary.
 
 This heterogeneity demands orchestration intelligence: systematic rubrics for decomposition, compliance-gated routing, cross-boundary learning.
 
@@ -49,9 +49,9 @@ This is not a risk you can insure against. It is a risk you must architect aroun
 
 Fine-tuning and training specialized models used to be prohibitively expensive — a frontier-lab luxury. That has changed.
 
-The cost of training a domain-specialized 3B-7B parameter model has dropped by orders of magnitude since 2022. Open base models (Llama, Mistral, Phi) eliminate the need to train from scratch. LoRA and QLoRA reduce fine-tuning compute to commodity GPU levels. A small team can now produce a domain-specialized model for tens of thousands of dollars — a rounding error compared to enterprise frontier API spend.
+The cost of fine-tuning a domain-specialized 3B-7B parameter model has dropped by orders of magnitude since 2022. Open base models (Llama, Mistral, Phi) reduce the need to train from scratch. LoRA and QLoRA enable fine-tuning on commodity GPUs — a single training job for an 8B model can cost as little as $30-500 depending on dataset size and compute choices. A small team can now produce a domain-specialized model for a fraction of what enterprise frontier API spend would cost for equivalent task volume.
 
-Meanwhile, frontier inference costs add up. Stanford's 2025 AI Index reports that per-token costs dropped 280-fold between 2022 and 2024, yet enterprise AI budgets continue rising as usage growth outpaces efficiency gains. Organizations paying $0.01-0.03 per 1K tokens for frontier models could be paying $0.0001-0.001 for specialized SLMs on equivalent tasks.
+Meanwhile, frontier inference costs add up. Stanford's 2025 AI Index reports that per-token costs dropped 280-fold between 2022 and 2024, yet enterprise AI budgets continue rising as usage growth outpaces efficiency gains. Frontier models still command $2.50-15 per million tokens for capable reasoning models, while specialized SLMs through inference providers run $0.15-0.70 per million — and self-hosted models approach near-zero marginal cost after hardware amortization.
 
 The crossover has occurred: for high-volume, bounded tasks, *building* a specialized model is now cheaper than *renting* frontier inference. And unlike API spend, the specialized model is an asset you own, deploy where you choose, and improve over time.
 
@@ -106,7 +106,7 @@ The specialized models exist. The integration protocols exist (MCP). The agent f
 
 ### Multi-Model Today vs. Multi-Model Across Tiers
 
-Today's multi-model deployments typically involve shuffling between frontier providers — GPT-4 for reasoning, Claude for writing, Gemini for multimodal. This is model arbitrage, not architectural transformation. The cost differentials are modest. The capability gaps are narrow. The compliance postures are similar. You're choosing between $15-30 per million token options based on vibes or vendor preference.
+Today's multi-model deployments typically involve switching between frontier providers — GPT-4 for reasoning, Claude for writing, Gemini for multimodal. This is selecting among frontier options, not architectural transformation. The cost differentials are modest. The capability gaps are narrow. The compliance postures are similar. You're choosing between $15-30 per million token options based on vibes or vendor preference.
 
 Multi-model across *tiers* is fundamentally different. You're not choosing between frontier options. You're routing:
 
@@ -115,7 +115,7 @@ Multi-model across *tiers* is fundamentally different. You're not choosing betwe
 - A complex legal analysis to a 70B model in a FedRAMP environment
 - A novel research synthesis to frontier — because this is the 5% of tasks that actually need it
 
-The cost differential can be 100x. The latency differential can be 10x. The compliance differential can be binary — possible versus impossible.
+The cost differential can reach 20-100x depending on model pairing. The latency differential can be an order of magnitude. The compliance differential can be binary — possible versus impossible.
 
 This heterogeneity demands orchestration intelligence:
 
@@ -855,8 +855,6 @@ This paper represents architectural thinking, not a finished implementation. The
 
 This paper is published at github.com/pbpuckett3/mci-pattern-wp. Issues, pull requests, and forks are welcome.
 
-For substantial collaboration inquiries: paul@relentlesspursuits.io
-
 ---
 
 ## Conclusion
@@ -917,5 +915,4 @@ MCI is a pattern for the former. Not a product. Not an SDK. A framework for buil
 
 His work spans defense technology, enterprise architecture, and AI systems design, with particular focus on mission-critical deployments where compliance and auditability are non-negotiable constraints.
 
-Contact: paul@relentlesspursuits.io
 GitHub: github.com/pbpuckett3
