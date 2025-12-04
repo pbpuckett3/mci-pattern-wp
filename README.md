@@ -68,7 +68,7 @@ Patterns propagate across enclaves. Content stays put.
 
 ## Architecture
 
-![MCI Architecture](docs/images/mci_architecture_diagram.png)
+![MCI Architecture](docs/images/MCI_Architecture_Diagram.png)
 
 *MCP as the universal connective tissue: centralized control plane for policy/routing, distributed execution for scale, peer collaboration within authorized workflows.*
 
